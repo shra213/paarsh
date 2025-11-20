@@ -14,8 +14,10 @@ export function authenticateToken(req: Request, res: Response, next: NextFunctio
 
   try {
     const payload = jwt.verify(token, JWT_SECRET) as any;
+
     (req as any).userId = payload.userId;
     (req as any).role = payload.role;
+    console.log("authenticated")
     next();
   } catch (err) {
     return res.status(401).json({ message: "Invalid or expired token" });

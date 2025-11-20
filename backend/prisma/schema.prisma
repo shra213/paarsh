@@ -12,6 +12,60 @@ model User {
   name      String
   email     String   @unique
   password  String
-  role      String // "User" or "Admin"
+  role      String
   createdAt DateTime @default(now())
+
+  // Relations
+  posts            Post[]
+  sentRequests     FriendRequest[] @relation("SentRequests")
+  receivedRequests FriendRequest[] @relation("ReceivedRequests")
+  friendsAsUser    Friend[]        @relation("UserFriends")
+  friendsAsFriend  Friend[]        @relation("FriendUsers")
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  content   String
+  image     String?
+  likes     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  author   User @relation(fields: [authorId], references: [id])
+  authorId Int
+}
+
+model FriendRequest {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  // Sender
+  sender   User @relation("SentRequests", fields: [senderId], references: [id])
+  senderId Int
+
+  // Receiver
+  receiver   User @relation("ReceivedRequests", fields: [receiverId], references: [id])
+  receiverId Int
+
+  status RequestStatus @default(Pending)
+}
+
+enum RequestStatus {
+  Pending
+  Accept
+  Reject
+}
+
+model Friend {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  // User A
+  user   User @relation("UserFriends", fields: [userId], references: [id])
+  userId Int
+
+  // User B (the friend)
+  friend   User @relation("FriendUsers", fields: [friendId], references: [id])
+  friendId Int
+
+  @@unique([userId, friendId])
 }
